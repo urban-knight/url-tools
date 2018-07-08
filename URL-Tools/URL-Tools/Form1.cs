@@ -23,10 +23,16 @@ namespace URL_Tools
             InitializeComponent();
         }
 
-        public static OuterResult GetFinalRedirect(string url)
+        public static OuterResult getOuterResult(string url)
         {
+            OuterResult result = new OuterResult();
+            result.Redirects = new List<RequestResult>();
+
             if (string.IsNullOrWhiteSpace(url))
-                return null;
+            {
+                result.Endpoint = new RequestResult("", HttpStatusCode.BadGateway, "");
+                return result;
+            }
 
             int maxRedirCount = 4;
             string newUrl = url;
@@ -37,8 +43,6 @@ namespace URL_Tools
             {
                 HttpWebRequest req = null;
                 HttpWebResponse res = null;
-                
-                
                 try
                 {
                     req = (HttpWebRequest)HttpWebRequest.Create(url);
@@ -48,25 +52,16 @@ namespace URL_Tools
                     switch (res.StatusCode)
                     {
                         case HttpStatusCode.OK:
-                            if (redirected)
-                            {
-                                redirected = false;
-                                return new OuterResult(status, newUrl);
-
-                            } else
-                            {
-                                return new OuterResult(res.StatusCode, newUrl);
-                            }
-                            
+                             result.Endpoint = new RequestResult(url, res.StatusCode, newUrl);
+                             return result;
                         case HttpStatusCode.Redirect:
                         case HttpStatusCode.MovedPermanently:
                         case HttpStatusCode.RedirectKeepVerb:
                         case HttpStatusCode.RedirectMethod:
-                            newUrl = res.Headers["Location"];
-                            status = res.StatusCode;
-                            redirected = true;
-                            if (newUrl == null)
-                                return new OuterResult(status, url);
+                             newUrl = res.Headers["Location"];
+                             status = res.StatusCode;
+                             redirected = true;
+                             result.Redirects.Add(new RequestResult(url, res.StatusCode, newUrl));
 
                             if (newUrl.IndexOf("://", System.StringComparison.Ordinal) == -1)
                             {
@@ -75,7 +70,8 @@ namespace URL_Tools
                             }
                             break;
                         default:
-                            return new OuterResult(res.StatusCode, newUrl);
+                            result.Endpoint = new RequestResult(url, res.StatusCode, newUrl);
+                            return result;
                     }
                     url = newUrl;
                 }
@@ -83,10 +79,12 @@ namespace URL_Tools
                 {
                     if (e.Status == WebExceptionStatus.ProtocolError)
                     {
-                        return new OuterResult(((HttpWebResponse)e.Response).StatusCode, newUrl);
+                        result.Endpoint = new RequestResult(url, ((HttpWebResponse)e.Response).StatusCode, newUrl);
+                        return result;
                     }
                     else {
-                        return new OuterResult(HttpStatusCode.BadGateway, newUrl);
+                        result.Endpoint = new RequestResult(url, HttpStatusCode.BadGateway, newUrl);
+                        return result;
                     }
                 }
                 catch (Exception ex)
@@ -99,22 +97,24 @@ namespace URL_Tools
                         res.Close();
                 }
             } while (maxRedirCount-- > 0);
-
-            return new OuterResult(HttpStatusCode.BadGateway, newUrl);
+            result.Endpoint = new RequestResult(url, HttpStatusCode.BadGateway, newUrl);
+            return result;
         }
 
         private void test_button_Click(object sender, EventArgs e)
         {
             foreach (DataGridViewRow row in outerdataGridView.Rows)
             {
-                if (row.Cells[0].Value != null) {
-                    string _url = row.Cells[0].Value.ToString();
-                    OuterResult res = GetFinalRedirect(@_url);
-                    row.Cells[1].Value = (int)res.statusCode + ": " + res.statusCode;
-                    if (res.endURL != row.Cells[0].Value.ToString())
-                    {
-                        row.Cells[2].Value = res.endURL;
-                    }
+                if (row.Cells[outerdataGridView.Columns["entryPoint"].Index].Value != null) {
+                    string _url = row.Cells[outerdataGridView.Columns["entryPoint"].Index].Value.ToString();
+                    OuterResult res = getOuterResult(@_url);
+                    row.Cells[outerdataGridView.Columns["endUrl"].Index].Value = (int)res.Endpoint.statusCode + ": " + res.Endpoint.endURL;
+                    if (res.Redirects.Count > 0)
+                        row.Cells[outerdataGridView.Columns["firstRedirect"].Index].Value = (int)res.Redirects[0].statusCode + ": " + res.Redirects[0].endURL;
+                    if (res.Redirects.Count > 1)
+                        row.Cells[outerdataGridView.Columns["secondRedirect"].Index].Value = (int)res.Redirects[1].statusCode + ": " + res.Redirects[1].endURL;
+                    if (res.Redirects.Count > 2)
+                        row.Cells[outerdataGridView.Columns["thirdRedirect"].Index].Value = (int)res.Redirects[2].statusCode + ": " + res.Redirects[2].endURL;
                 }
 
             }
