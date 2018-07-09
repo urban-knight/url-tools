@@ -1,0 +1,12 @@
+C:\Git\url-tools\URL-Tools\URL-Tools\bin\Release\URL-Tools.exe.config
+C:\Git\url-tools\URL-Tools\URL-Tools\bin\Release\URL-Tools.exe
+C:\Git\url-tools\URL-Tools\URL-Tools\bin\Release\URL-Tools.pdb
+C:\Git\url-tools\URL-Tools\URL-Tools\bin\Release\Newtonsoft.Json.dll
+C:\Git\url-tools\URL-Tools\URL-Tools\bin\Release\Newtonsoft.Json.xml
+C:\Git\url-tools\URL-Tools\URL-Tools\obj\Release\URL_Tools.Form1.resources
+C:\Git\url-tools\URL-Tools\URL-Tools\obj\Release\URL_Tools.Properties.Resources.resources
+C:\Git\url-tools\URL-Tools\URL-Tools\obj\Release\URL-Tools.csproj.GenerateResource.cache
+C:\Git\url-tools\URL-Tools\URL-Tools\obj\Release\URL-Tools.csproj.CoreCompileInputs.cache
+C:\Git\url-tools\URL-Tools\URL-Tools\obj\Release\URL-Tools.csproj.CopyComplete
+C:\Git\url-tools\URL-Tools\URL-Tools\obj\Release\URL-Tools.exe
+C:\Git\url-tools\URL-Tools\URL-Tools\obj\Release\URL-Tools.pdb
